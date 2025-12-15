@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>편지 작성 및 전송 시뮬레이션 (말풍선 모달 적용)</title>
+    
+    <script>
+        (function(d) {
+          var config = {
+            kitId: 'mxn6rjj',
+            scriptTimeout: 3000,
+            async: true
+          },
+          h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='https://use.typekit.net/'+config.kitId+'.js';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
+        })(document);
+    </script>
+    
+    <style>
+        /* ======================================= */
+        /* CSS: 오른쪽 상단 고정 레이아웃 (개별 분리 강화) */
+        /* ======================================= */
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: inherit;
+            font-weight: inherit;
+            font-style: inherit;
+        }
+
+        /* 폰트 및 배경 설정 */
+        body {
+            width: 100vw;
+            height: 100vh;
+            font-family: "dotumche", sans-serif !important; 
+            font-weight: 400 !important;
+            font-style: normal !important;
+            font-size: 14px; 
+            
+            background-image: url('https://i.imgur.com/gxoSwlS.png');
+            background-size: 1550px auto; 
+            background-repeat: no-repeat;
+            
+            background-position: center center; 
+            background-attachment: fixed;
+            position: relative; 
+            
+            display: flex;
+            justify-content: center; 
+            align-items: center; 
+            overflow: hidden; 
+        }
+
+        /* 메인 컨테이너 */
+        #main-container {
+            display: flex;
+            width: 95%; 
+            max-width: 1200px; 
+            background-color: transparent; 
+            box-shadow: none; 
+            min-height: 100px;
+            position: static; 
+        }
+        
+        /* 왼쪽 콘텐츠 박스 (편지 영역) */
+        .left-content {
+             flex: 1; 
+             padding: 50px 100px 70px 100px; 
+             display: flex;
+             flex-direction: column;
+             align-items: center;
+             justify-content: center;
+             background-color: transparent;
+             width: 100%; 
+        }
+
+        /* 입력 창 스타일 */
+        #animated-text {
+            width: 100%;
+            height: 500px; 
+            border: none; 
+            background-color: transparent;
+            resize: none;
+            outline: none;
+            font-size: 1.5em; 
+            padding: 0;
+            line-height: 3;
+            text-align: left; 
+        }
+        
+        /* ======================================= */
+        /* 오른쪽 사이드바 영역 */
+        /* ======================================= */
+        .right-sidebar {
+            position: fixed; 
+            top: 60px; 
+            right: 20px; 
+            width: 150px; 
+            padding: 20px 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            background-color: rgba(255, 255, 255, 5); 
+            border: 1px solid black; 
+            z-index: 10; 
+            position: fixed; 
+        }
+        
+        /* 뒤로가기 버튼 영역 스타일 */
+        #back-button-container {
+            position: absolute; 
+            top: -50px; 
+            right: -10px; 
+            cursor: pointer;
+            z-index: 10; 
+            width: 39px; 
+            height: 40px; 
+        }
+
+        #back-button {
+            width: 100%; 
+            height: 100%; 
+            display: block;
+            background-image: url('https://i.imgur.com/GcK29iF.png'); 
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        /* 전송 상태 표시 영역 */
+        #status-display {
+            margin-top: 10px; 
+            margin-bottom: 25px; 
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+        
+        #status-display h1 {
+             margin-bottom: 15px; 
+             font-size: 1.2em; 
+        }
+
+        #status-display p {
+             margin-top: 5px; 
+             line-height: 1.4; 
+        }
+
+        /* 상태 이미지 크기 */
+        #sending-image {
+            height: 40px; 
+            width: 100px; 
+            margin-top: 10px;
+            margin-bottom: 15px;
+        }
+
+        /* 개별 액션 버튼 스타일 */
+        .custom-button {
+            cursor: pointer;
+            padding: 3px 10px;
+            margin-top: 14px; 
+            width: 100px; 
+            border: 1px solid #000;
+            font-size: 0.9em;
+            background-color: #f7f7f7;
+            text-align: center;
+            line-height: 1.3;
+            transition: background-color 0.1s;
+        }
+
+        .custom-button:hover:not(.disabled) {
+            background-color: #ddd;
+        }
+        
+        /* 비활성화 스타일 */
+        .custom-button.disabled {
+            cursor: default;
+            background-color: #ccc;
+            color: #666;
+            opacity: 0.1;
+        }
+
+        /* 이미지 편지함 컨테이너 및 로그 스타일 (생략) */
+        #history-log-container { width: 250%; margin-top: 0px; display: none; display: flex; justify-content: center; }
+        #history-log-background { width: 195px; height: 210px; background-image: url('https://i.imgur.com/jsK3puQ.png'); background-size: contain; background-repeat: no-repeat; background-position: center; padding: 0; }
+        #history-log { overflow-y: auto; height: 100%; width: 100%; padding: 20px 50px 20px 60px; line-height: 1.2; }
+        #history-log > p, .history-item { text-align: left !important; font-size: 0.8em; line-height: 1.4; word-break: break-word; width: 100%; }
+        #history-log > p { margin-top: 5px; } 
+        .history-item { padding: 6px 0; }
+        
+        /* 하단 장식 이미지 컨테이너 */
+        #bottom-image-container { 
+            position: fixed; 
+            bottom: 50px; 
+            right: 30px; 
+            z-index: 1000;
+            width: auto; 
+            height: auto;
+        }
+
+        /* 🪨 이미지 떨림 애니메이션 정의 */
+        @keyframes subtle-wobble {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 1px) rotate(-1deg); }
+            75% { transform: translate(1px, 1px) rotate(1deg); }
+            100% { transform: translate(-1px, -1px) rotate(-1deg); }
+        }
+        
+        /* 하단 이미지 스타일 */
+        #bottom-image { 
+            max-width: 60px; 
+            cursor: pointer; 
+            display: block;
+            animation: subtle-wobble 1.5s infinite; 
+            transition: transform 0.2s; 
+            box-shadow: none; 
+            border-radius: 0; 
+        }
+        
+        /* 호버 시 애니메이션 일시 정지 및 추가 효과 */
+        #bottom-image:hover {
+            animation-play-state: paused;
+            transform: scale(1.15); 
+        }
+
+        h1 { font-size: 1.2em; }
+        
+        /* 말풍선 스타일 */
+        #speech-bubble {
+            position: absolute; 
+            bottom: 60px; 
+            right: 60px; 
+            width: 280px; 
+            padding: 15px;
+            background-color: white; 
+            border: 2px solid black;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0);
+            z-index: 1001; 
+            display: none; 
+            
+            
+                /* 🚨 수정: 말풍선 텍스트를 왼쪽 정렬로 명시적으로 설정 🚨 */
+            text-align: left;
+            
+            /* 꼬리표 CSS (생략) */
+            &::after { content: ''; position: absolute; bottom: -10px; right: 5px; width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 10px solid black; z-index: 1002; }
+            &::before { content: ''; position: absolute; bottom: -8px; right: 7px; width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid white; z-index: 1003; }
+        }
+        
+        .bubble-content h2 { margin-bottom: 10px; font-size: 1.2em; text-align: center; }
+        /* 🚨 추가: 말풍선 내부의 p 태그도 왼쪽 정렬을 명시적으로 설정 🚨 */
+        .bubble-content p { 
+            line-height: 1.5; 
+            margin-bottom: 5px; 
+            font-size: 0.9em;
+            text-align: left; /* 명시적 왼쪽 정렬 */
+            word-break: keep-all; /* 단어 단위로 줄바꿈을 시도하여 자연스러움을 높임 */
+        }
+
+        /* 모바일 대응 (생략) */
+        @media (max-width: 600px) {
+            body { align-items: flex-start; } 
+            #main-container { flex-direction: column; min-height: initial; }
+            .left-content { padding: 40px 20px; border-bottom: 1px solid #eee; }
+            .right-sidebar { position: fixed; top: 20px; right: 20px; width: 150px; background-color: rgba(255, 255, 255, 1); padding: 20px; border: 1px solid black; }
+            #back-button-container { top: -10px; right: -10px; width: 25px; height: 25px; }
+            #bottom-image-container { position: fixed; bottom: 20px; right: 20px; }
+            #speech-bubble { width: 200px; bottom: 75px; right: 0px; }
+            #speech-bubble::after { right: 50px; } 
+            #speech-bubble::before { right: 52px; } 
+        }
+    </style>
+</head>
+<body>
+
+<div id="main-container">
+    <div class="left-content">
+        <textarea id="animated-text" placeholder="여기에 편지 내용을 입력하세요..." rows="10"></textarea>
+    </div>
+    
+    <div class="right-sidebar">
+        <div id="back-button-container">
+            <div id="back-button"></div>
+        </div>
+        
+        <div id="status-display">
+            <h1>전송 상태</h1>
+            <img id="sending-image" src="https://i.imgur.com/gIfONqJ.png" alt="수신 중 이미지" style="display: none;">
+            <p id="status-message">버튼을 눌러 편지를 보내세요.</p>
+        </div>
+        
+        <div id="send-button" class="custom-button"> 보내기</div>
+        
+        <div id="toggle-history-button" class="custom-button">보낸 편지<br>보기</div>
+        
+        <br>
+        
+        <div id="history-log-container">
+            <div id="history-log-background">
+                <div id="history-log">
+                    <p style="text-align: left; color: black; margin-top: 5px; font-size: 0.8em; line-height: 1.4;">전송된 편지가<br>없습니다.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="bottom-image-container">
+    
+    <div id="speech-bubble" class="bubble-content">
+        <h2>다른 세계에서 보내는 편지</h2>
+        <p>
+            이곳은 다른 세계에서 보내는 편지를 쓰는 자리입니다.
+            익숙한 장소를 향한 기록이자, 제한된 세계 바깥을 상상하고 바라보기 위해 편지를 씁니다.
+        </p>
+    </div>
+    
+    <img id="bottom-image" src="https://i.imgur.com/mnv4aTL.png" alt="하단 장식 이미지">
+
+</div>
+
+
+<script>
+    // =======================================
+    // JavaScript (수정된 로직)
+    // =======================================
+    document.addEventListener("DOMContentLoaded", function () {
+        const textarea = document.getElementById('animated-text');
+        const sendButton = document.getElementById('send-button'); 
+        const toggleHistoryButton = document.getElementById('toggle-history-button'); 
+        
+        const sendingImage = document.getElementById('sending-image');
+        const statusMessage = document.getElementById('status-message');
+        const historyLogContainer = document.getElementById('history-log-container'); 
+        const historyLog = document.getElementById('history-log');
+        
+        const bottomImageContainer = document.getElementById('bottom-image-container');
+        const bottomImage = document.getElementById('bottom-image'); 
+        const speechBubble = document.getElementById('speech-bubble'); 
+        
+        const backButtonContainer = document.getElementById('back-button-container'); 
+        
+        const IMAGE_URL_1 = 'https://i.imgur.com/gIfONqJ.png'; 
+        const IMAGE_URL_2 = 'https://i.imgur.com/LOFolGh.png'; 
+        let intervalId;
+        let letterHistory = []; 
+        
+        // 🚨 수정된 부분: 뒤로가기 버튼 클릭 이벤트 핸들러
+        backButtonContainer.addEventListener('click', function() {
+            // 지정된 URL로 이동
+            window.location.href = 'https://yeonjicheon.github.io/index.html/';
+        });
+
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[i], array[j]];
+            }
+            return array;
+        }
+
+        function showRandomHistory() {
+            if (letterHistory.length === 0) {
+                // JS에서 새로 생성할 때도 왼쪽 정렬 적용
+                historyLog.innerHTML = '<p style="text-align: left; color: black; margin-top: 5px; font-size: 0.8em; line-height: 1.4;">전송된 편지가<br>없습니다.</p>';
+                return;
+            }
+
+            const shuffledHistory = shuffleArray([...letterHistory]);
+            historyLog.innerHTML = ''; 
+
+            shuffledHistory.forEach(content => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                
+                let displayContent = content.replace(/\n/g, '<br>');
+                
+                if (displayContent.length > 100) { 
+                    displayContent = displayContent.substring(0, 100) + '...';
+                }
+                
+                div.innerHTML = displayContent; 
+                historyLog.appendChild(div);
+            });
+        }
+        
+        toggleHistoryButton.addEventListener('click', function() {
+            if (toggleHistoryButton.classList.contains('disabled')) return; 
+            
+            if (historyLogContainer.style.display === 'none' || historyLogContainer.style.display === '') {
+                showRandomHistory(); 
+                historyLogContainer.style.display = 'flex'; 
+                // 텍스트 변경: 보낸 편지 보기 -> 보낸 편지 숨기기
+                toggleHistoryButton.innerHTML = "보낸 편지<br>숨기기"; 
+            } else {
+                historyLogContainer.style.display = 'none'; 
+                // 텍스트 변경: 보낸 편지 숨기기 -> 보낸 편지 보기
+                toggleHistoryButton.innerHTML = "보낸 편지<br>보기";
+            }
+        });
+
+        textarea.addEventListener('input', function() {
+            if (this.value.length > 0) {
+                this.classList.add('writing-active');
+            } else {
+                this.classList.remove('writing-active');
+            }
+        });
+
+        sendButton.addEventListener('click', function() {
+            if (sendButton.classList.contains('disabled')) return; 
+            
+            const letterContent = textarea.value.trim();
+            if (letterContent === "") {
+                alert("편지 내용을 입력해주세요!");
+                return;
+            }
+            
+            // 버튼 비활성화 및 클래스 추가
+            sendingImage.style.display = 'block';
+            sendButton.classList.add('disabled');
+            toggleHistoryButton.classList.add('disabled');
+            textarea.disabled = true;
+            
+            statusMessage.textContent = "편지를 수신 중입니다...";
+            statusMessage.style.color = 'gray'; 
+            
+            // 이미지 깜빡임 효과 시작
+            let toggle = true;
+            intervalId = setInterval(() => {
+                sendingImage.src = toggle ? IMAGE_URL_2 : IMAGE_URL_1;
+                toggle = !toggle;
+            }, 500); 
+            
+            setTimeout(() => {
+                clearInterval(intervalId);
+                alert("편지 전송 완료!");
+                letterHistory.push(letterContent); 
+                if (historyLogContainer.style.display === 'flex') {
+                    showRandomHistory();
+                }
+                
+                // 버튼 활성화 및 클래스 제거
+                sendingImage.style.display = 'none';
+                sendingImage.src = IMAGE_URL_1; 
+                sendButton.classList.remove('disabled');
+                toggleHistoryButton.classList.remove('disabled');
+                textarea.disabled = false;
+                
+                textarea.value = ''; 
+                textarea.classList.remove('writing-active'); 
+                statusMessage.textContent = "전송 완료! 새로운 편지를 작성하세요.";
+                statusMessage.style.color = 'green';
+                setTimeout(() => {
+                    statusMessage.textContent = "버튼을 눌러 편지를 보내세요.";
+                    statusMessage.style.color = 'initial';
+                }, 2000);
+            }, 5000); // 5초 대기
+        });
+        
+        // =======================================
+        // 말풍선(Speech Bubble) 로직
+        // =======================================
+        
+        // 1. 하단 이미지 클릭 시 말풍선 토글
+        bottomImage.addEventListener('click', function(event) {
+            event.stopPropagation(); 
+            speechBubble.style.display = (speechBubble.style.display === 'block') ? 'none' : 'block';
+        });
+
+        // 2. 말풍선 외 영역 클릭 시 말풍선 닫기
+        document.addEventListener('click', function(event) {
+            // 클릭된 요소가 말풍선이거나 말풍선 내부의 요소, 또는 이미지 컨테이너가 아니라면 닫기
+            if (speechBubble.style.display === 'block' && 
+                !speechBubble.contains(event.target) && 
+                !bottomImageContainer.contains(event.target)) {
+                speechBubble.style.display = 'none';
+            }
+        });
+    });
+</script>
+</body>
+</html>
+

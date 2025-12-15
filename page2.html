@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>마우스 트래킹 배경 + 바운싱 원형 텍스트</title>
+
+    
+
+    <script>
+
+        (function(d) {
+
+          var config = {
+
+            kitId: 'mxn6rjj', // Typekit ID는 동일하게 유지
+
+            scriptTimeout: 3000,
+
+            async: true
+
+          },
+
+          h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='https://use.typekit.net/'+config.kitId+'.js';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
+
+        })(document);
+
+    </script>
+
+
+
+    <style>
+
+        /* ========================================= */
+
+        /* 1. 기본 스타일 및 마우스 트래킹 배경 CSS */
+
+        /* ========================================= */
+
+        body {
+
+            margin: 0;
+
+            width: 100vw;
+
+            height: 100vh;
+
+            overflow: hidden;
+
+            background-color: black;
+
+            cursor: none;
+
+        }
+
+
+
+        /* 배경 이미지 컨테이너 (Z-index: 1) */
+
+        #background-container {
+
+            position: fixed;
+
+            top: 0;
+
+            left: 0;
+
+            width: 100%;
+
+            height: 100%;
+
+            background-size: cover;
+
+            background-position: center center;
+
+            transition: background-image 0s;
+
+            z-index: 1;
+
+        }
+
+
+
+        /* 마우스 커서 요소 (마젠타) */
+
+        #custom-cursor {
+
+            position: absolute;
+
+            width: 15px;
+
+            height: 15px;
+
+            border-radius: 50%;
+
+            background-color: rgb(255, 0, 255); /* 마젠타 */
+
+            pointer-events: none;
+
+            transform: translate(-50%, -50%);
+
+            transition: transform 0.1s ease-out;
+
+            z-index: 100;
+
+        }
+
+
+
+        /* ========================================= */
+
+        /* 2. 바운싱 원형 텍스트 박스 CSS */
+
+        /* ========================================= */
+
+        
+
+        /* <a> 태그 스타일 */
+
+        .circle-link {
+
+            position: absolute;
+
+            z-index: 20;
+
+            display: block; 
+
+            text-decoration: none; /* <a> 태그 자체의 밑줄 제거 */
+
+        }
+
+        
+
+        #bouncing-circle {
+
+            /* 원의 크기 */
+
+            width: 230px;
+
+            height: 230px;
+
+            
+
+            border-radius: 50%;
+
+            background-color: rgba(255, 0, 255, 1); 
+
+            
+
+            /* 기본 빛나는 효과 */
+
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0);
+
+            
+
+            /* transform 0.1s 추가: 클릭/호버 시 크기 변화 애니메이션 */
+
+            transition: box-shadow 0.3s ease-in-out, transform 0.1s; 
+
+            
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            
+
+            cursor: pointer; 
+
+        }
+
+        
+
+        /* 호버 시 빛나는 효과 */
+
+        .circle-link:hover #bouncing-circle {
+
+            box-shadow: 0 0 25px rgba(255, 0, 255, 0),
+
+                        0 0 50px rgba(255, 0, 255, 0);
+
+            /* 호버 시 약간 커지는 효과 추가 */
+
+            transform: scale(1.05);
+
+        }
+
+
+
+        /* 클릭 시 (Active) 효과: 빛나는 효과 제거, 커지는 효과 */
+
+        .circle-link:active #bouncing-circle {
+
+            transform: scale(1.1); /* 원이 더 커지게 변경 */
+
+        }
+
+        
+
+        #circle-text {
+
+            /* 텍스트 스타일 */
+
+            width: 90%; 
+
+            text-align: center;
+
+            padding: 5px;
+
+            
+
+            /* ★★★ 폰트 변경: "Onul담소" -> "Onul한체" ★★★ */
+
+            font-family: "Onul한체", sans-serif; 
+
+            font-weight: 500;
+
+            font-style: normal;
+
+
+
+            color: black; 
+
+            font-size: 1.1em; 
+
+            line-height: 1.5;
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+
+
+    <div id="background-container"></div>
+
+    
+
+    <a href="https://yeonjicheon.github.io/index.html/" class="circle-link" id="circle-link-wrapper">
+
+        <div id="bouncing-circle">
+
+            <div id="circle-text"></div>
+
+        </div>
+
+    </a>
+
+
+
+    <div id="custom-cursor"></div>
+
+
+
+    <script>
+
+        // =========================================
+
+        // JavaScript: 마우스 트래킹, 배경 전환 및 바운싱 로직
+
+        // =========================================
+
+
+
+        const bgContainer = document.getElementById('background-container');
+
+        const customCursor = document.getElementById('custom-cursor');
+
+        const circleLinkWrapper = document.getElementById('circle-link-wrapper'); 
+
+        const bouncingCircle = document.getElementById('bouncing-circle');
+
+        const circleText = document.getElementById('circle-text');
+
+        
+
+        // 1. 마우스 트래킹 이미지 목록 (18개)
+
+        const images = [
+
+            "https://i.imgur.com/RhkzDjY.png", 
+
+            "https://i.imgur.com/KLuYaX6.png", 
+
+            "https://i.imgur.com/yuQ0WuS.png", 
+
+            "https://i.imgur.com/tGeclfO.png", 
+
+            "https://i.imgur.com/c7j7mbK.png", 
+
+            "https://i.imgur.com/cH5eiOh.png", 
+
+            "https://i.imgur.com/I1oQ2FF.png", 
+
+            "https://i.imgur.com/9E5cWTr.png", 
+
+            "https://i.imgur.com/iDg1Xzv.png", 
+
+            "https://i.imgur.com/6JNrVg6.png", 
+
+            "https://i.imgur.com/frxMzdk.png", 
+
+            "https://i.imgur.com/OPDiRtB.png", 
+
+            "https://i.imgur.com/GE2uJ4P.png", 
+
+            "https://i.imgur.com/pza4vdD.png", 
+
+            "https://i.imgur.com/kPOv3NQ.png", 
+
+            "https://i.imgur.com/KMKx3ME.png", 
+
+            "https://i.imgur.com/j0YzgKq.png", 
+
+            "https://i.imgur.com/bowzlDV.png" 
+
+        ];
+
+        const numImages = images.length; 
+
+        let currentImageIndex = 0;
+
+        bgContainer.style.backgroundImage = `url(${images[currentImageIndex]})`;
+
+
+
+        document.addEventListener('mousemove', (e) => {
+
+            const width = window.innerWidth;
+
+            const mouseX = e.clientX;
+
+            
+
+            // 커서 위치 업데이트
+
+            customCursor.style.left = `${mouseX}px`;
+
+            customCursor.style.top = `${e.clientY}px`; 
+
+
+
+            // 배경 이미지 인덱스 결정 (순간이동 효과)
+
+            const segmentWidth = width / numImages; 
+
+            let newIndex = Math.floor(mouseX / segmentWidth);
+
+            newIndex = Math.min(Math.max(0, newIndex), numImages - 1);
+
+
+
+            if (newIndex !== currentImageIndex) {
+
+                bgContainer.style.backgroundImage = `url(${images[newIndex]})`;
+
+                currentImageIndex = newIndex;
+
+            }
+
+        });
+
+
+
+
+
+        // 2. 바운싱 원형 및 텍스트 전환 로직
+
+        const textArray = [
+
+            `나는 ‘지방이 아닌 서울’이<br>아니라, 아예 다른 세계를 원한다.`,
+
+            `현실의 일상은 때론<br>숨 막히는 갑갑함이다.`,
+
+            `현실 경계를 넘어,<br>상상으로 확장되는 공간.`,
+
+            `인천 구도심, 느린 시간<br>속에 겹겹이 쌓인 또 다른 세계.`
+
+        ];
+
+        let currentTextIndex = 0;
+
+        let collisionCount = 0; 
+
+
+
+        // 바운싱 물리 변수
+
+        let posX = window.innerWidth / 2;
+
+        let posY = window.innerHeight / 2;
+
+        
+
+        let velX = 0.5; 
+
+        let velY = 0.8; 
+
+
+
+        // 원의 반지름 크기: 120 (원의 크기 240px)
+
+        const radius = 120; 
+
+
+
+        // 초기 텍스트 설정
+
+        circleText.innerHTML = textArray[currentTextIndex];
+
+
+
+        function updateCircle() {
+
+            // 원의 크기가 변경되었으므로 max 값도 변경
+
+            const maxX = window.innerWidth - radius * 2; 
+
+            const maxY = window.innerHeight - radius * 2;
+
+
+
+            // 위치 업데이트
+
+            posX += velX;
+
+            posY += velY;
+
+
+
+            let isCollision = false;
+
+
+
+            // X축 경계 충돌 검사
+
+            if (posX > maxX || posX < 0) {
+
+                velX *= -1; // 방향 반전
+
+                // 경계 보정 
+
+                posX = Math.max(0, Math.min(posX, maxX)); 
+
+                isCollision = true;
+
+            }
+
+
+
+            // Y축 경계 충돌 검사
+
+            if (posY > maxY || posY < 0) {
+
+                velY *= -1; // 방향 반전
+
+                // 경계 보정
+
+                posY = Math.max(0, Math.min(posY, maxY)); 
+
+                isCollision = true;
+
+            }
+
+
+
+            // 충돌 시 텍스트 변경
+
+            if (isCollision) {
+
+                collisionCount++;
+
+                if (collisionCount % 1 === 0) { 
+
+                    currentTextIndex = (currentTextIndex + 1) % textArray.length;
+
+                    circleText.innerHTML = textArray[currentTextIndex];
+
+                }
+
+            }
+
+            
+
+            // DOM 위치 업데이트 (<a> 태그의 위치를 업데이트합니다)
+
+            circleLinkWrapper.style.left = `${posX}px`;
+
+            circleLinkWrapper.style.top = `${posY}px`;
+
+
+
+            // 다음 프레임 요청
+
+            requestAnimationFrame(updateCircle);
+
+        }
+
+
+
+        // 창 크기가 변경될 때 바운싱 영역 재설정 (선택 사항)
+
+        window.addEventListener('resize', () => {
+
+             const maxX = window.innerWidth - radius * 2;
+
+             const maxY = window.innerHeight - radius * 2;
+
+             posX = Math.max(0, Math.min(posX, maxX));
+
+             posY = Math.max(0, Math.min(posY, maxY));
+
+        });
+
+
+
+        // 애니메이션 시작
+
+        updateCircle();
+
+
+
+    </script>
+
+</body>
+
+</html>
+

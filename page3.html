@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>여러 겹겹의 세계</title>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">
+
+    <style>
+        /* ========== CSS (기존 스타일 유지) ========== */
+        :root {
+            --base-color: rgba(255, 255, 255, 0.05); 
+            --sparkle-color: rgba(255, 255, 255, 0.15); 
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scrollbar-color: #f1f1f1 #fff;
+            scrollbar-width: thin;
+        }
+        
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow-x: hidden; 
+            background-image: 
+                url('https://i.imgur.com/8kpNA4x.png'),
+                radial-gradient(circle at 10% 10%, var(--sparkle-color) 1px, transparent 1.5px),
+                radial-gradient(circle at 50% 50%, var(--sparkle-color) 1px, transparent 1.5px),
+                radial-gradient(circle at 90% 30%, var(--sparkle-color) 1px, transparent 1.5px),
+                radial-gradient(circle at 30% 80%, var(--sparkle-color) 1px, transparent 1.5px);
+
+            background-size: 
+                cover, 
+                300px 300px, 
+                300px 300px, 
+                300px 300px, 
+                300px 300px;
+            
+            animation: sparkle-move 10s linear infinite alternate;
+        }
+        
+        @keyframes sparkle-move {
+            0% {
+                background-position: 
+                    center center, 
+                    0px 0px, 
+                    50px 50px, 
+                    100px 100px, 
+                    150px 150px;
+            }
+            100% {
+                background-position: 
+                    center center,
+                    300px 300px, 
+                    250px 250px, 
+                    200px 200px, 
+                    150px 150px;
+            }
+        }
+
+        #header-img {
+            position: fixed;
+            top: -10%;
+            left: 30%;
+            width: 40%;
+            height: auto;
+            z-index: 6;
+            display: block;
+            pointer-events: none;
+        }
+
+        /* =================================== */
+        /* 🌟 움직이는 띠 배너 스타일 유지 🌟 */
+        /* =================================== */
+        #ticker {
+            position: fixed; 
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 25px; 
+            background-color: #000; 
+            color: white; 
+            overflow: hidden; 
+            white-space: nowrap; 
+            font-size: 0.9em;
+            line-height: 25px; 
+            z-index: 100; 
+            text-transform: uppercase; 
+        }
+
+        #ticker-content {
+            display: inline-block; 
+            padding-left: 100%; 
+            animation: scroll 20s linear infinite; 
+        }
+
+        @keyframes scroll {
+            0% { transform: translateX(0); } 
+            100% { transform: translateX(-100%); } 
+        }
+
+        /* 중앙 박스 및 본문 스타일 유지 */
+        .container { width: 100%; height: 130%; position: relative; z-index:10; display: flex; justify-content: center; align-items: center; background-color: transparent; }
+        .central-box { width: 810px; border: 2px solid black; height: 60vh; background-color: white; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06); overflow-y: auto; padding: 35px; }
+        .central-box::-webkit-scrollbar { width: 8px; }
+        .central-box::-webkit-scrollbar-thumb { background-color: #333; border-radius: 10px; }
+        .central-box::-webkit-scrollbar-track { background-color: #f1f1f1; }
+        #collage-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 20; pointer-events: auto; }
+        .collage-img { position: absolute; display: block; height: auto; cursor: pointer; transition: transform 0.1s ease-in-out, filter 0.3s ease; }
+        /* (개별 위치 스타일 생략) */
+        [data-pos="1"] { top: 68%; left: 66%; width: 187px; } [data-pos="2"] { top: 25%; right: 70%; width: 600px; } [data-pos="22"] { top: 15%; right: -10%; width: 600px; } [data-pos="3"] { bottom: 26%; left: 72%; width: 270px; } [data-pos="4"] { bottom: -11%; right: 45%; width: 500px; } [data-pos="5"] { top: 89%; left: 55%; transform: translateY(-50%); width: 500px; } [data-pos="6"] { top: 15%; right: -4%; width: 240px; transform: translateY(-56%); } [data-pos="7"] { top: 45%; left: 70%; transform: translateX(-50%); width: 140px; } [data-pos="8"] { bottom: -1%; left: 5%; transform: translateX(-58%); width: 430px; } [data-pos="9"] { top: 1%; left: 69%; width: 400px; } [data-pos="10"] { top: -6%; right: 80%; width: 400px; } [data-pos="11"] { top: 40%; left: 45%; width: 55px; } [data-pos="12"] { top: 76%; right: 54%; width: 250px; } [data-pos="13"] { bottom: 14%; left: 78%; width: 160px; } [data-pos="14"] { bottom: 75%; right: 75%; width: 190px; } [data-pos="15"] { top: 74%; left: 69%; width: 250px; } [data-pos="16"] { top: 63%; right: 78%; width: 330px; } [data-pos="17"] { bottom: 49%; left: 12%; width: 300px; } [data-pos="18"] { bottom: 14%; right: 1%; width: 420px; } [data-pos="19"] { top: -3%; left: 62%; width: 380px; } [data-pos="20"] { top: 40%; left: 4%; width: 570px; } [data-pos="21"] { top: 50%; left: 78%; width: 450px; }
+        @keyframes shake { 0% { transform: translateY(-56%) rotate(0deg); } 25% { transform: translateY(-56%) rotate(-0.5deg); } 75% { transform: translateY(-56%) rotate(0.5deg); } 100% { transform: translateY(-56%) rotate(0deg); } }
+        [data-pos="6"]:hover { animation: shake 0.2s infinite; filter: brightness(1.2) drop-shadow(0 0 5px rgba(255, 255, 255, 0.8)); z-index: 21; }
+        
+        /* intro-text 클래스만 display: none 처리하여 제거 */
+        .intro-text {
+            display: none; 
+        }
+        
+        /* 모달 스타일 유지 */
+        #image-modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.0); display: flex; justify-content: center; align-items: center; overflow: auto; }
+        #modal-content-container { background: white; padding: 5px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0); position: relative; width: auto; height: auto; max-width: 50vw; max-height: 50vh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        #modal-content { max-width: 300px; max-height: 300px; width: auto; height: auto; display: block; }
+        .close-container { position: absolute; top: 5px; right: 5px; width: 20px; height: 20px; cursor: pointer; z-index: 10001; }
+        .close-icon { fill: none; stroke: #333; stroke-width: 2.5; stroke-linecap: butt; transition: stroke 0.3s; }
+        .close-container:hover .close-icon { stroke: #666; }
+    </style>
+
+</head>
+<body>
+
+    <div id="ticker">
+        <span id="ticker-content">
+            여러 겹겹의 세계는 여러 문화가 겹쳐 쌓인 개항장의 기억을 풀어보고, 다시 엮어보는 이야기다.
+나의 경험과 이곳의 시간을 겹쳐 보며, 결국 각자만의 차이나타운을 만들어 가는 과정을 담았다. &nbsp;&nbsp;&nbsp;&nbsp; 
+            여러 문화가 중첩된 개항장의 겹겹의 세계 → 나만의 방식으로 이곳을 다시 되짚어본다. → 나만의 차이나타운을 만들어보자. &nbsp;&nbsp;&nbsp;&nbsp;
+        </span>
+    </div>
+
+
+    <img id="header-img" src="https://i.imgur.com/dl3Syij.png" alt="웹사이트 헤더">
+
+    <div id="collage-layer">
+        <img src="https://i.imgur.com/idyhw3Q.png" alt="콜라주 이미지 1" class="collage-img" data-pos="1" data-index="0" onclick="openModal(this)">
+        <img src="https://i.imgur.com/NMZigMT.png" alt="콜라주 이미지 2" class="collage-img" data-pos="2" data-index="1" onclick="openModal(this)">
+        <img src="https://i.imgur.com/NMZigMT.png" alt="콜라주 이미지 22" class="collage-img" data-pos="22" data-index="2" onclick="openModal(this)">
+        <img src="https://i.imgur.com/lE5bHIf.png" alt="콜라주 이미지 3" class="collage-img" data-pos="3" data-index="3" onclick="openModal(this)">
+        <img src="https://i.imgur.com/JXg2J1j.png" alt="콜라주 이미지 4" class="collage-img" data-pos="4" data-index="4" onclick="openModal(this)">
+        <img src="https://i.imgur.com/Gxm0kmi.png" alt="콜라주 이미지 5" class="collage-img" data-pos="5" data-index="5" onclick="openModal(this)">
+        
+        <img src="https://i.imgur.com/Hpzdkvj.png" alt="콜라주 이미지 6" class="collage-img" data-pos="6" data-index="6" onclick="redirectToUrl()">
+        
+        <img src="https://i.imgur.com/zz0SebT.png" alt="콜라주 이미지 7" class="collage-img" data-pos="7" data-index="7" onclick="openModal(this)">
+        <img src="https://i.imgur.com/7bWpjJn.png" alt="콜라주 이미지 8" class="collage-img" data-pos="8" data-index="8" onclick="openModal(this)">
+        <img src="https://i.imgur.com/huo7Y3Z.png" alt="콜라주 이미지 9" class="collage-img" data-pos="9" data-index="9" onclick="openModal(this)">
+        <img src="https://i.imgur.com/AvRNMXC.png" alt="콜라주 이미지 10" class="collage-img" data-pos="10" data-index="10" onclick="openModal(this)">
+        <img src="https://i.imgur.com/HP4EGQs.png" alt="콜라주 이미지 11" class="collage-img" data-pos="11" data-index="11" onclick="openModal(this)">
+        <img src="https://i.imgur.com/x3qXMGo.png" alt="콜라주 이미지 12" class="collage-img" data-pos="12" data-index="12" onclick="openModal(this)">
+        <img src="https://i.imgur.com/BO8wkPT.png" alt="콜라주 이미지 13" class="collage-img" data-pos="13" data-index="13" onclick="openModal(this)">
+        <img src="https://i.imgur.com/xmUIz3L.png" alt="콜라주 이미지 14" class="collage-img" data-pos="14" data-index="14" onclick="openModal(this)">
+        <img src="https://i.imgur.com/L1MkiXY.png" alt="콜라주 이미지 15" class="collage-img" data-pos="15" data-index="15" onclick="openModal(this)">
+        <img src="https://i.imgur.com/7DtWc5G.png" alt="콜라주 이미지 17" class="collage-img" data-pos="17" data-index="16" onclick="openModal(this)">
+        <img src="https://i.imgur.com/LMwZchU.png" alt="콜라주 이미지 18" class="collage-img" data-pos="18" data-index="17" onclick="openModal(this)">
+        <img src="https://i.imgur.com/URkmeC4.png" alt="콜라주 이미지 19" class="collage-img" data-pos="19" data-index="18" onclick="openModal(this)">
+        <img src="https://i.imgur.com/CA5NJCs.png" alt="콜라주 이미지 20" class="collage-img" data-pos="20" data-index="19" onclick="openModal(this)">
+        <img src="https://i.imgur.com/Z85lh6O.png" alt="콜라주 이미지 21" class="collage-img" data-pos="21" data-index="20" onclick="openModal(this)">
+        <img src="https://i.imgur.com/ZEFqYgW.png" alt="콜라주 이미지 16" class="collage-img" data-pos="16" data-index="21" onclick="openModal(this)">
+    </div>
+
+    <div class="container">
+      <div class="central-box">
+        
+        <div class="intro-text">
+            **여러 겹겹의 세계**는 여러 문화가 중첩된 개항장의 기억을 해체하고 재구성하는 인터랙티브 웹 경험입니다.<br>
+            사용자의 경험과 도시의 시간을 겹쳐보며, 궁극적으로 **'나만의 차이나타운'**을 창조하고 기록합니다.
+        </div>
+        
+        <p>차이나타운 오시는 법은 간단합니다. 1호선 인천역 으로 오시면 됩니다. 예전 인천 분들이라면 "하인천" 이라고 부르기도 합니다만 요즘엔 잘 안 쓰는 말 이네요. 지하철로 오실때 주의점은 직통 열차가 동인천 역까지만 있습니다. 동인천역 에서 내려 신포시장, 중구청을 거처 오는법도 좋지만 너무 멀지요? 인천역에 내리면 바로 보이니 헤멜일은 없습니다. 차로 오실 분들 이라면... 네비게이션 있는 분들은 인천역을 찍고 오시면 됩니다. 아니, 그 전에 차이나타운이 있을 겁니다. 주차장은 인천역 에서 북성동 동사무소로 올라오는 길로 10m 못되서 좌측으로 공영주차장이 있습니다. 싸서 좋지만 주행로 폭이 좁아 차 끼리 잘 엉키네요.
+네비가 없다면 조금 난이도가 있습니다. 제1,2경인 고속도로 종점서 우회전( 그 말은 제1경인 종점을 지나...)을 하면 삼거리가 나오고 거기서 좌회전. 교회 앞 사거리 에서 월미도 방면으로 직진 입니다. 그런데 여기가 모양은 사거리가 아니라 5거리 입니다. 11시 방향으로 가세요 1시 방향으로 가시면 동인천역 인데 헤메게 됩니다. 정확하게 가셧다면 이마트와 국제여객터미널, 중구청 입구를 지나게 됩니다. 계속 직진하다 보면 고가차도가 나오는데 여기서 고가차도를 타면 다시 배는 산으로-_-; 고가 오른쪽으로 빠지는데 여기서 주의!!! 좌회전 하면 월미도, 직진하면 다시 산으로 갑니다. 결론은 우회전. 그럼 아실겁니다. 빨간 집들이 보이거든요.
+개인적으로 차이나 타운 음식에 아쉬운 것은 많이 있습니다. 맛이 점점 우리나라 사람들의 입맛에 맞춰 진다는 것 이지요. 5년전 정도만 하여도 입구쪽의 큰 집을 제외하고는 다들 중국 본토 음식에 가까운 맛 이였습니다. 엄청 거칠면서 중국 향신료( 합성이 아닌 천연... )도 많이 들어가고요. 나쁘게 말하면 돼지냄새나 생마늘 냄새가 풀풀 나는것이 제가 좋아하는 거친 현지식 같은 느낌? 그런데 점점 그 거친맛이 부드러워 지고 특색이 없어지고 있습니다. 다들 이곳에오셔서 나만의 차이나타운을 만들어보세요.
+</p>
+      </div>
+    </div>
+        
+    <div id="image-modal">
+        <div id="modal-content-container">
+            <div class="close-container" onclick="closeModal()">
+                <svg viewBox="0 0 24 24" class="close-icon">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+            </div>
+            <img class="modal-content" id="modal-content" src="https://i.imgur.com/7gJDT2E.png">
+        </div>
+    </div>
+
+    <script>
+        // JS 기능 유지
+        const BASE_URLS = [
+            "https://i.imgur.com/dxnHRqF.png", "https://i.imgur.com/sdtkfaD.png", "https://i.imgur.com/ReBRPC8.png", "https://i.imgur.com/xEAZH0x.png",
+            "https://i.imgur.com/JfCjs4f.png", "https://i.imgur.com/9B729uh.png", "https://i.imgur.com/Z1Ke1lF.png", "https://i.imgur.com/V4AuAz8.png",
+            "https://i.imgur.com/GzfxQnu.png", "https://i.imgur.com/VTfcU7h.png", "https://i.imgur.com/RJ4oVc3.png", "https://i.imgur.com/IimYiL2.png",
+            "https://i.imgur.com/5qhaYj6.png", "https://i.imgur.com/gOV7iz8.png", "https://i.imgur.com/0BD4LJ6.png", "https://i.imgur.com/lrsDkQl.png",
+            "https://i.imgur.com/PzgvAiU.png"
+        ];
+        const NEW_IMAGE_URLS = [
+            ...BASE_URLS, BASE_URLS[0], BASE_URLS[1], BASE_URLS[2], BASE_URLS[3], BASE_URLS[4]
+        ];
+        
+        // 🚨 수정된 함수: 흔들리는 이미지 클릭 시 다음 페이지(예: page1.html)로 이동
+        function redirectToUrl() { 
+            // 'https://yeonjicheon.github.io/index.html/' 대신 내부 파일 경로를 사용합니다.
+            // 다음 페이지 파일 이름을 'page1.html'이라고 가정합니다.
+            window.location.href = "./page1.html"; 
+        }
+
+        var modal = document.getElementById("image-modal");
+        var modalContent = document.getElementById("modal-content");
+        
+        function openModal(clickedImage) {
+            const index = parseInt(clickedImage.getAttribute('data-index')); 
+            modalContent.src = (index !== null && index >= 0 && index < NEW_IMAGE_URLS.length) ? NEW_IMAGE_URLS[index] : "https://i.imgur.com/7gJDT2E.png"; 
+            modal.style.display = "flex"; 
+        }
+
+        function closeModal() { modal.style.display = "none"; }
+        
+        window.onclick = function(event) { if (event.target == modal) { closeModal(); } }
+    </script>
+</body>
+</html>
+
+
